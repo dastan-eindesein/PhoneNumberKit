@@ -158,6 +158,18 @@ open class PhoneNumberTextField: UITextField, UITextFieldDelegate {
         }
     }
     
+    public var ignoreIntlNumbers = true {
+        didSet {
+            self.partialFormatter.ignoreIntlNumbers = self.ignoreIntlNumbers
+        }
+    }
+    
+    public var ignoreNationalPrefix = false {
+        didSet {
+            self.partialFormatter.ignoreNationalPrefix = self.ignoreNationalPrefix
+        }
+    }
+    
     /// The type of phone number to use for the example placeholder. Defaults to `.mobile`.
     public var ofType: PhoneNumberType = .mobile {
         didSet {
