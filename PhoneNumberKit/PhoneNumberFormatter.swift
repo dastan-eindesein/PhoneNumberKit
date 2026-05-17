@@ -32,6 +32,19 @@ open class PhoneNumberFormatter: Foundation.Formatter {
             self.partialFormatter.withPrefix = self.withPrefix
         }
     }
+    @objc public dynamic
+    var ignoreIntlNumbers = true {
+        didSet {
+            self.partialFormatter.ignoreIntlNumbers = self.ignoreIntlNumbers
+        }
+    }
+    
+    @objc public dynamic
+    var ignoreNationalPrefix = false {
+        didSet {
+            self.partialFormatter.ignoreNationalPrefix = self.ignoreNationalPrefix
+        }
+    }
 
     @objc public dynamic
     var currentRegion: String {

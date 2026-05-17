@@ -17,28 +17,37 @@ public final class PartialFormatter {
     weak var parser: PhoneNumberParser?
     weak var regexManager: RegexManager?
 
-    public convenience init(utility: PhoneNumberUtility = PhoneNumberUtility(),
-                            defaultRegion: String = PhoneNumberUtility.defaultRegionCode(),
-                            withPrefix: Bool = true,
-                            maxDigits: Int? = nil,
-                            ignoreIntlNumbers: Bool = false) {
-        self.init(utility: utility,
-                  regexManager: utility.regexManager,
-                  metadataManager: utility.metadataManager,
-                  parser: utility.parseManager.parser,
-                  defaultRegion: defaultRegion,
-                  withPrefix: withPrefix,
-                  maxDigits: maxDigits,
-                  ignoreIntlNumbers: ignoreIntlNumbers)
+    public convenience init(
+        utility: PhoneNumberUtility = PhoneNumberUtility(),
+        defaultRegion: String = PhoneNumberUtility.defaultRegionCode(),
+        withPrefix: Bool = true,
+        maxDigits: Int? = nil,
+        ignoreIntlNumbers: Bool = true,
+        ignoreNationalPrefix: Bool = false
+    ) {
+        self.init(
+            utility: utility,
+            regexManager: utility.regexManager,
+            metadataManager: utility.metadataManager,
+            parser: utility.parseManager.parser,
+            defaultRegion: defaultRegion,
+            withPrefix: withPrefix,
+            maxDigits: maxDigits,
+            ignoreIntlNumbers: ignoreIntlNumbers,
+            ignoreNationalPrefix: ignoreNationalPrefix
+        )
     }
-
-    init(utility: PhoneNumberUtility,
-         regexManager: RegexManager,
-         metadataManager: MetadataManager,
-         parser: PhoneNumberParser, defaultRegion: String,
-         withPrefix: Bool = true,
-         maxDigits: Int? = nil,
-         ignoreIntlNumbers: Bool = false) {
+    
+    init(
+        utility: PhoneNumberUtility,
+        regexManager: RegexManager,
+        metadataManager: MetadataManager,
+        parser: PhoneNumberParser, defaultRegion: String,
+        withPrefix: Bool = true,
+        maxDigits: Int? = nil,
+        ignoreIntlNumbers: Bool = false,
+        ignoreNationalPrefix: Bool = false
+    ) {
         self.utility = utility
         self.regexManager = regexManager
         self.metadataManager = metadataManager
@@ -48,6 +57,7 @@ public final class PartialFormatter {
         self.withPrefix = withPrefix
         self.maxDigits = maxDigits
         self.ignoreIntlNumbers = ignoreIntlNumbers
+        self.ignoreNationalPrefix = ignoreNationalPrefix
     }
 
     public var defaultRegion: String {
@@ -74,6 +84,7 @@ public final class PartialFormatter {
     var shouldAddSpaceAfterNationalPrefix = false
     var withPrefix = true
     var ignoreIntlNumbers = false
+    var ignoreNationalPrefix = false
 
     // MARK: Status
 
@@ -91,15 +102,16 @@ public final class PartialFormatter {
 
     public func nationalNumber(from rawNumber: String) -> String {
         guard let parser else { return rawNumber }
-
-        let iddFreeNumber = self.extractIDD(rawNumber)
+        
+        let iddFreeNumber = ignoreIntlNumbers ? rawNumber : self.extractIDD(rawNumber)
         var nationalNumber = parser.normalizePhoneNumber(iddFreeNumber)
         if !self.prefixBeforeNationalNumber.isEmpty {
             nationalNumber = self.extractCountryCallingCode(nationalNumber)
         }
 
-        nationalNumber = self.extractNationalPrefix(nationalNumber)
-
+        if !ignoreNationalPrefix {
+            nationalNumber = self.extractNationalPrefix(nationalNumber)
+        }
         if let maxDigits {
             let extra = nationalNumber.count - maxDigits
 
